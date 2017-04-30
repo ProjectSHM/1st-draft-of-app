@@ -1,0 +1,593 @@
+# -*- coding: utf-8 -*-
+from Tkinter import *
+import ttk
+import tkFont
+import math
+
+def screen_raise(screen):
+   """raises chosen frame to front of window"""
+   screen.tkraise()
+
+def title(screen_, text_, font_, pad_):
+   """creates a title and packs to screen"""
+   ### ~~ allows for screen alignment for title frame to be adjusted to stretch with window resize
+   screen_.grid_columnconfigure(0, weight=1)
+   ### ~~ creates a title frame so that all widgets may be packed onto this to allow for screen resize and packs it to the screen
+   title_frame = Frame(screen_, bg="#CCE1F1")
+   title_frame.grid(row=0, column=0, sticky=N+E+W, padx=pad_, pady=pad_)
+
+   ### ~~ creates a help button and grids it to the title frame
+   help_button = Button(title_frame, text="Help", command=help_screen, bg="#CCE1F1")
+   help_button.grid(row=0, column=3, sticky=W, ipadx=15, ipady=3, padx=2)
+
+   ### ~~ creates a load button and grids it to title frame
+   load_button = Button(title_frame, text="Load", bg="#CCE1F1" )
+   load_button.grid(row=0, column=0, sticky=E, ipadx=15, ipady=3, padx=2)
+
+   ### ~~ creates a frame to put the header inside with boarder and grids to title frame this prevents title from stretching with window resize
+   header_frame = Frame(title_frame,)
+   header_frame.grid(row=0, column=2)
+   ### ~~ creates the title from function input and grids to title frame
+   title = Label(header_frame, text=text_ , font=font_, bg="#CCE1F1")
+   title.grid(row=0, column=2, sticky=W+E, ipadx=30)
+   ### ~~ alows relevent grid in title to stretch to accomdate Label
+   title_frame.grid_columnconfigure(2, weight=1)
+   title_frame.grid_rowconfigure(0, weight=3)
+
+   ### ~~ creates and grids save button 
+   save_button = Button(title_frame, text="Save", bg="#CCE1F1")
+   save_button.grid(row=0, column=1, sticky=E, ipadx=15, ipady=3, padx=2)
+   ### ~~ bypass' save button for relevent screens and replaces with empty label to keep screen configuration in line
+   if screen_ == home_screen:
+       save_button.grid_remove()
+       Frame(title_frame, bg="#CCE1F1").grid(row=0, column=1, sticky=E, ipadx=32, ipady=15, padx=2)
+
+   ### ~~ creates quit button and grids to title frame, will have save functionality added during intergration
+   quit_button = Button(title_frame, text="Quit", bg="#CCE1F1", command=lambda:root.destroy())
+   quit_button.grid(row=0, column=4, sticky=E, ipadx=15, ipady=3, padx=2)
+
+def intro_text(screen_, text_):
+   """creates an intro text box with text and packs it to screen"""
+   ### ~~ allows for screen alignment for intro frame to be adjusted to stretch with window resize
+   screen_.grid_rowconfigure(1, weight=1)
+   ### ~~ creates a intro frame so that all widgets may be packed onto this to allow for screen resize and packs it to the screen
+   intro_frame = Frame(screen_, bg="#CCE1F1")
+   intro_frame.grid(row=1, column=0, pady=10)
+   ### ~~ configures intro frame to allow for screen resolution stretch
+   intro_frame.grid_columnconfigure(0, weight=1)
+   intro_frame.grid_rowconfigure(0, weight=1)
+
+   ### ~~ creates intro text with boarder and grids to intro frame
+   intro_label = Label(intro_frame, text=text_, bg="white",
+                       relief=SOLID, bd=1)
+   intro_label.grid(row=1, ipady=5, ipadx=5, sticky=N, pady=10)
+
+def contents(screen_):
+   """packs a box with all relevent contents buttons to contents screen"""
+   ### ~~ allows for screen alignment for contents frame to be adjusted to stretch with window resize
+   screen_.grid_rowconfigure(2, weight=2)
+   ### ~~ creates a contents frame so that all widgets may be packed onto this to allow for screen resize and packs it to the screen
+   contents_frame = Frame(screen_, bg="#CCE1F1")
+   contents_frame.grid(row=2, column=0, sticky=N+E+W, pady=10)
+
+   ### ~~ creates box frame with boarder to have widgets packed onto
+   box_frame = Frame(contents_frame, relief=RIDGE, bd=5, bg="white")
+   box_frame.grid(row=0, column=0, sticky=N)
+
+   ### ~~ creates buttons to be pressed to rase relevent screen
+   theory_button = Button(box_frame, text="Theory", bg="#CCE1F1", 
+                              command=lambda:screen_raise(theory_screen))
+   vel_button = Button(box_frame, text="Velocity and Acceleration", bg="#CCE1F1",
+                                command=lambda:screen_raise(vel_screen))
+   phase_button = Button(box_frame, text="Phase Relationship", bg="#CCE1F1",
+                             command=lambda:screen_raise(phase_screen))
+   test_button = Button(box_frame, text="Test Yourself", bg="#CCE1F1",
+                            command=lambda:screen_raise(test_screen))
+
+   ### ~~ grids butons to box_frame in relevent order
+   x = 0
+   for button in (theory_button, vel_button, phase_button, test_button):
+       button.grid(row=x, column=0, sticky=W+E, padx=50, pady=20, ipady=10)
+       contents_frame.grid_rowconfigure(x, weight=1)
+       x += 1
+   ### ~~ configures buttons to stretch to fill space
+   contents_frame.grid_columnconfigure(0, weight=1)
+
+   ### ~~ creates labels to explain what each button does
+   theory_label = Label(box_frame, text="Choose this to understand the Background behind Simple \n Harmonic Motion and real world applications".lower(), bg="white", bd=1, relief=SOLID)
+   vel_label = Label(box_frame, text="Choose this to observe how simple harmonic motion is affected \n by changes in acceleration and velocity, and understand why. \n In this section you will also learn how to calculate the acceleration and velocity of an SHM wave at any point.", bd=1, bg="white", relief=SOLID)
+   phase_label = Label(box_frame, text="Choose this to learn about Phase and the relationship this \n has with simple harmonic motion.", bd=1, bg="white", relief=SOLID)
+   test_label = Label(box_frame, text="Choose this to test your knowledge of simple harmonic motion", bd=1, bg="white", relief=SOLID)
+
+   ### ~~ grids labels next to buttons
+   x=0
+   for label in (theory_label, vel_label, phase_label, test_label):
+       label.grid(row=x, column=1, sticky=W+E+S+N, pady=20, padx=50, ipadx=30)
+       x += 1
+
+def nav_buttons(screen_):
+   """packs navigation buttons to screen and sets back and next buttons to
+   relevent screens dependant on screen"""
+   ### ~~ creates nav_frame to grid buttons to and grids to main frame
+   nav_frame = Frame(screen_, bg="#CCE1F1")
+   nav_frame.grid(row=3, column=0, padx=10, pady=10, sticky=N+E+S+W)
+
+   ### ~~ sets variables to change dependant on current screen
+   back = 0
+   next_ = 0
+
+   ### ~~ changes variable dependant on current screen
+   if screen_ == theory_screen:
+       back = home_screen
+       next_ = vel_screen
+   elif screen_ == vel_screen:
+       back = theory_screen
+       next_ = phase_screen
+   elif screen_ == phase_screen:
+       back = vel_screen
+       next_ = test_screen
+   elif screen_ == test_screen:
+       back = phase_screen
+
+   ### ~~ configures columns so buttons will move accrording to screeen size to relevant position
+   x = 0
+   while x < 3:
+       nav_frame.grid_columnconfigure(x, weight=1)
+       x += 1
+
+   ### ~~ creates button and applies navigation commands using variables
+   back_button = Button(nav_frame, text="Back", bg="#CCE1F1",
+                            command=lambda:screen_raise(back))
+   home_button = Button(nav_frame, text="Home", bg="#CCE1F1",
+                            command=lambda:screen_raise(home_screen))
+   next_button = Button(nav_frame, text="Next", bg="#CCE1F1",
+                            command=lambda:screen_raise(next_))
+
+   ### ~~ grids butons to relevent point on nav frame
+   back_button.grid(row=0, column=0, sticky=W, ipadx=15, ipady=3)
+   home_button.grid(row=0, column=1, ipadx=15, ipady=3)
+   next_button.grid(row=0, column=2, sticky=E, ipadx=15, ipady=3)
+
+   ### ~~~ hides navigation buttons on home screen and replaces them with identicle frame
+   if screen_ == home_screen:
+       home_button.grid_remove()
+       back_button.grid_remove()
+       next_button.grid_remove()
+       Frame(nav_frame, bg="#CCE1F1").grid(row=0, column=0, sticky=E, ipadx=32, ipady=15, padx=2)
+       Frame(nav_frame, bg="#CCE1F1").grid(row=0, column=1, sticky=E, ipadx=32, ipady=15, padx=2)
+       Frame(nav_frame, bg="#CCE1F1").grid(row=0, column=2, sticky=E, ipadx=32, ipady=15, padx=2)
+   ### ~~~ removes next button if about to initiate test
+   if screen_ == test_screen:
+       next_button.grid_remove()
+       Frame(nav_frame, bg="#CCE1F1").grid(row=0, column=2, sticky=E, ipadx=32, ipady=15, padx=2)
+
+   ### ~~~ creates text and image frames to input text and animations
+def text_image(screen_):
+   """creates text and image boxs on screen will have to be tweaked when using different images
+   also creates execute button for animations"""
+
+   size = tkFont.Font(size=11)
+
+   ### ~~ allows for screen alignment for text/image frame to be adjusted to stretch with window resize
+   screen_.grid_rowconfigure(2, weight=10)
+   ### ~~ creates frame to pack bulk text and images
+   bulk_text_frame = Frame(screen_, bg="#CCE1F1")
+   bulk_text_frame.grid(row=2, column=0, sticky=NS)
+   ### ~~ configures frame so images and text stretch to fit
+   bulk_text_frame.grid_columnconfigure(0, weight=1)
+   bulk_text_frame.grid_columnconfigure(1, weight=1)
+
+   ### ~~ creates text frame with boarder and grids it to left side it onto the text/image frame
+   text_frame = Frame(bulk_text_frame, bg="white")
+   text_frame.grid(row=0, column=0, sticky=W+N+E, padx=20)
+   ### ~~ configures text frame to fit required space
+   text_frame.grid_columnconfigure(0, weight=1)
+   text_frame.grid_rowconfigure(0, weight=1)
+
+   ### ~~ creates text frame to input text for reader 'explains needed info'
+
+   ### ~~ creates statement to put relevent text and animation on theory screen
+   if screen_ == theory_screen:
+
+   ### ~~ creates text for theory screen and displays it in text frame
+       text_theory = Label(text_frame, text="""Oscillations are repeating movements, and an intricate
+ part of the real world. From sound waves when speaking 
+ or playing musical instruments, to swinging motions on 
+ rope bridges or, well, swings. This app will look at a form of oscillation called Simple
+ Harmonic Motion which occurs when the force is directly 
+ proportional and opposite to the displacement of the object.
+
+ F=-kx 
+
+
+ The best way to visualise this is to observe the animation of the spring.""", bg="white", width=75, font=size)
+       text_theory.grid(row=0, column=0, sticky=N+S+E+W, padx=20, pady=20)
+       
+   ### ~~ creates text for velocitay and acceleration screen and displays relevent text
+   if screen_ == vel_screen:
+       text_VA = Label(text_frame, text="""To find the equation for the velocity, the equation of displacement
+ needs to be differentiated:""""""To find the equation for the velocity, the equation of displacement
+ needs to be differentiated:
+
+ So y=A sin(ωt+φ)
+
+ becomes v=Aωcos(ωt+φ)
+
+ By differentiating again, the equation for the acceleration can be found:
+
+ a=-Aω2sin(ωt+φ) = -ω2y 
+
+ It is obvious from the above equations that: 
+
+ 1. For y=+/- A: the acceleration is at maximum (which means that it is - Aω2) and v=0.
+ 2. For y=0: a=0 and the velocity is at maximum (which means that it is equal to Aω).
+ 3. The direction of the acceleration is opposite to the displacement.  """
+                       , bg="white", width=75, font=size)
+       text_VA.grid(row=0, column=0, sticky=N+S+E+W, padx=20, pady=20)
+
+   ### ~~ displays relevent text for phase screen
+   if screen_ == phase_screen:
+        text_Phase = Label(text_frame, text="""The phase, point on a cycle, is represented as the angle φ (Greek letter phi)
+ measured in radians and can be used to calculate the displacement y when time=0 s.
+
+ Depending on the direction that the motion is transferred, φ can be positive or negative. 
+ - if φ>0: the movement is sliding to the left \- if φ<0: the movement is sliding to the right
+ How to calculate the phase for a mass completing simple harmonic motion: 
+ When t=0:y = A sin(φ) 
+
+ So,φ=sin-1(y/A)radians 
+
+ CAUTION:
+
+ When finding φ it is possible to get two results. That is due 
+ to the fact that y might be the same for two different values of φ, depending 
+ on the direction of the wave. This can be explained by observing the graphs.""", bg="white", width=75, font=size)
+        text_Phase.grid(row=0, column=0, sticky=N+S+E+W, padx=20, pady=20)
+   
+   ### ~~ creates image frame with boarder and grids it to left side it onto the text/image frame    
+   image_frame = Frame(bulk_text_frame, bg="#CCE1F1")
+   image_frame.grid(row=0, column=1, sticky=W+N+E, padx=20)
+   ### ~~ configures image frame to fit required space    
+   image_frame.grid_columnconfigure(0, weight=2)
+   image_frame.grid_rowconfigure(0, weight=1)
+   #image_frame.grid_rowconfigure(1, weight=1)
+
+   ### ~~ creates canvas to draw animations
+   image = Canvas(image_frame, width=400, height=320, bg="White")
+   ### ~~ creates text to show that image will be inserted and places it on relevant place on screen
+   image.grid(row=0, column=0, pady=10, padx=10, sticky=N+E+S+W)
+
+   ### ~~ creates animation for theory screen
+   if screen_ == theory_screen:
+
+      ### ~~ draws from global variables and sets variable for list
+      global c
+      global angle
+      radius = 50
+      x_circle_list = []
+      y_circle_list = []
+
+      ### ~~ empty lists used to generate x and y coordinates for animations
+      sin_x_list = []
+      sin_y_list = []
+
+      ### ~~ used to generate size of font for certain aspects of animation
+      size = tkFont.Font(size=12)
+
+      ### ~~ creates x and y cordinates and appends list for use in animation
+      for f in range(1, 360, 1):
+          x_circle_list.append(round(50*math.cos(math.radians(c*angle)), 1))
+          y_circle_list.append(round(-50*math.sin(math.radians(c*angle)), 1)+160)
+          c += 1
+
+      ### ~~ used to append place in picture frame
+      c=0
+      minus = 45-50
+      minus_x = 0
+
+      ### ~~ sets function to draw non moving parts of animation
+      def graphs():
+          theta_circle = image.create_oval(50,110-minus, 150, 210-minus)
+          circle_line_x = image.create_line(100, 160-minus, 150, 160-minus)
+          
+          graph_line_y = image.create_line(170, 90-minus, 170, 230-minus)
+          graph_line_arrow_y = image.create_line(170,90-minus, 165,95-minus), image.create_line(170,90-minus, 175,95-minus)
+          
+          graph_line_x = image.create_line(170, 160-minus, 386-minus_x, 160-minus)
+          graph_line_arrow_x = image.create_line(386-minus_x,160-minus, 381-minus_x, 155-minus), image.create_line(386-minus_x,160-minus, 381-minus_x, 165-minus)
+
+          image.create_text(175,80-minus, text="Amplitude")
+          image.create_text(380-minus_x,150-minus, text="Time")
+          image.create_text(200,15, text="y = Asin("+u'\u03A9'.lower()+"t + "+ u'\u03A6'.lower()+")", font=size)
+
+      ### ~~ creates parts for animation
+      def animation():
+
+          ### ~~ draws from global variables for use in animation
+          global c
+          global angle
+
+          spring_particle = image.create_oval(20,y_circle_list[c]-5-minus, 30,y_circle_list[c]+5-minus, fill="red")
+
+          circle_line = image.create_line(100,160-minus, x_circle_list[c]+100,y_circle_list[c]-minus )
+          circle_particle = image.create_oval(x_circle_list[c]+95,y_circle_list[c]-5-minus,
+                                                         x_circle_list[c]+105,y_circle_list[c]+5-minus, fill="red")
+
+          arc = image.create_arc(90,150-minus, 110,170-minus, start=0, extent=c*angle, fill="light blue")
+
+          ### ~~ deletes arc if it hits certain point
+          if c*angle == 362.16:
+              image.delete(arc)
+
+          ### ~~ draws sine wave, particle, angle in circle and conecting line    
+          sine_wave = image.create_line(170+c,y_circle_list[c]-minus, 170+c+1, y_circle_list[c+1]-minus, fill="blue")
+          sine_wave_particle = image.create_oval(165+c,y_circle_list[c]-5-minus, 175+c, y_circle_list[c]+5-minus, fill="red")
+
+          theta = image.create_text(112, 148-minus, text=u'\u0398'.lower())
+          link_line = image.create_line(x_circle_list[c]+100,y_circle_list[c]-minus, 170+c, y_circle_list[c]-minus, fill="grey")
+
+          ### ~~ activates execute button when animation is finished    
+          if 170+c+1 == 386:
+              execute.config(state=ACTIVE)
+              return
+
+          ### ~~ adds to counter variable and executes function to clear movin parts  
+          c +=1
+          root.after(20, clear_screen, spring_particle, circle_line, circle_particle, sine_wave_particle, link_line, arc)
+
+
+      ### ~~ function to clear moving parts of animation. function also calls animation to draw next frame
+      def clear_screen(a, b, c, d, e, f):
+          image.delete(a, b, c, d, e, f)
+          animation()
+
+      ### ~~ clears screen to initiate animation
+      def final_clear():
+          global c
+          c = 0
+          execute.config(state=DISABLED)
+          image.delete("all")
+          graphs()
+          root.after(40, animation)
+
+      ### ~~ creates button to initiate animation    
+      execute = Button(image_frame, text="Execute", bg="#CCE1F1", command=final_clear)
+      execute.grid(row=1, column=0, padx=10, pady=10, ipady=3, ipadx=2, sticky=E)    
+      graphs()
+
+   ### ~~ creates statement to access correct animation if velocity and acceleration screen is open
+   elif screen_ == vel_screen:
+
+      ### ~~ draws from gloabal variables used for animation, creates lists for coordinates and resets counter (c)
+      global omega
+      global time
+      global A
+      amp_y_list = []
+      acc_y_list = []
+      vel_y_list = []
+      c = 0
+      x_list = []
+
+      size = tkFont.Font(size=10)
+
+      ### ~~ appends lists for coordinate use in animation
+      for f in range(1, 360*5-50, 1):
+          amp_y_list.append(-A*math.sin(omega*time/8))
+          vel_y_list.append(-omega*A*math.sin(omega*time/8 + 3.14/2))
+          acc_y_list.append(omega**2*A*math.sin(omega*time/8))
+          x_list.append(time)
+          time += 0.2
+
+      ### ~~ resets time variable for later use
+      time = 0.2
+
+      ### ~~  creates graph for non moving parts
+      def graphs():
+          image.create_line(20,30 ,20,130), image.create_line(20,170 ,20,230), image.create_line(20,260 ,20,305)
+          image.create_line(20,80 ,370,80), image.create_line(20,200 ,370,200), image.create_line(20,280 ,370,280)
+          image.create_line(20,30, 15,35), image.create_line(20,170, 15, 175), image.create_line(20,260, 15,265)
+          image.create_line(20,30, 25,35), image.create_line(20,170, 25, 175), image.create_line(20,260, 25,265)
+          image.create_line(370,80, 365, 75), image.create_line(370,200, 365,195), image.create_line(370,280 ,365,275)
+          image.create_line(370,80, 365, 85), image.create_line(370,200, 365,205), image.create_line(370,280 ,365,285)
+
+          image.create_text(36,20, text="Amplitude"), image.create_text(29,160, text="Velocity"), image.create_text(43, 250, text="Acceleration")
+          image.create_text(367, 92, text="Time"), image.create_text(367, 212, text="Time"),image.create_text(367, 292, text="Time")
+
+          image.create_text(200,15, text="y = Asin("+u'\u03A9'.lower()+"t + "+ u'\u03A6'.lower()+")", font=size)
+          image.create_text(200,155, text="v = "+u'\u03A9'.lower()+"Asin("+u'\u03A9'.lower()+"t + "+ u'\u03A6'.lower()+")", font=size)
+          image.create_text(200,245, text="a = -"+u'\u03A9'.lower()+u"\u00B2"+"Asin("+u'\u03A9'.lower()+"t + "+ u'\u03A6'.lower()+") = -"u'\u03A9'.lower()+u"\u00B2"+"y", font=size)
+
+      ### ~~ creates function for animation
+      def animation():
+
+          ### ~~ draws gloabel counter variable (c) and creates lines to be dran as animations
+          global c
+          amp_sine = image.create_line(x_list[c]+20, amp_y_list[c]+80, x_list[c+1]+20, amp_y_list[c+1]+80, fill="black")
+          vel_sine = image.create_line(x_list[c]+20, vel_y_list[c]+200, x_list[c+1]+20, vel_y_list[c+1]+200, fill="red")
+          acc_sine = image.create_line(x_list[c]+20, acc_y_list[c]+280, x_list[c+1]+20, acc_y_list[c+1]+280, fill="blue")
+          c += 1
+
+          ### ~~ allows execute button to be used after animation
+          if c >= 358*5-50:
+              execute.config(state=ACTIVE)
+              return
+
+          ### ~~ used to animate graphs
+          root.after(2, animation)
+
+      ### ~~ used to reset graphs and delete image frame for new animation. disable execute button
+      def reset():
+          global c
+          c = 0
+          execute.config(state=DISABLED)
+          image.delete("all")
+          graphs()
+          animation()
+
+      ### ~~ creates button to enable animation and draws non animated graph lines
+      execute = Button(image_frame, text="Execute", bg="#CCE1F1", command=reset)
+      execute.grid(row=1, column=0, padx=10, pady=10, ipady=3, ipadx=2, sticky=E)      
+      graphs()
+
+   ### ~~ creates statement to access animation for phase screen
+   elif screen_ == phase_screen:
+
+      ### ~~ creates function to get values from sliders and input them into lists for phase animation
+      def get_values():
+
+         ### ~~ creates empty lists for coordinates
+         y_list = []
+         x_list = []
+
+         ### ~~ gets values from sliders for calculations 
+         amplitude = int(amp_slider.get())
+         omega = int(omega_slider.get())*(3.14/8)
+         phi = int(phi_slider.get())*(3.14/8)
+
+         ### ~~ sets time variables to zero and appends lists to contain coordinates for animation
+         time = 0
+         for i in range (1,350,1):
+            y_list.append(round(-amplitude*math.sin((omega*time/16 + phi)),2))
+            x_list.append(time)
+            time += 1.
+
+         ### ~~ calls function to animate graph using coordinates from lists
+         animate(x_list, y_list)
+
+      ### ~~ creates function to animate graph from lists in above function    
+      def animate(x, y):
+
+          ### ~~ creates sine wave line from list coordinates and adds one to counter
+          sine = image.create_line(x[d]+25, y[d]+160, x[d+1]+25, y[d+1]+160, fill="red")
+          d +=1
+
+          ### ~~ terminates animation upon completion
+          if d == 350-2:
+              execute_button.config(state=ACTIVE)
+              return
+
+          ### ~~ initiates animation
+          root.after(10, animate, x, y)
+
+      ### ~~ creates non animated lines for graph
+      def graph():
+          x_axis = image.create_line(25,30, 25, 300)
+          x_arrow = image.create_line(25,30, 20,35), image.create_line(25,30, 30,35)
+          y_axis = image.create_line(25,160, 380, 160)
+          y_arrow = image.create_line(380,160, 375,155), image.create_line(380,160, 375,165)
+          y_text = image.create_text(375, 175, text="Time, (s)")
+          x_text = image.create_text(45,15, text="Amplitude, (m)")
+
+      ### ~~ deletes animation and non animated lines for animation execute button also disables button to so that animation must finish befor re-initiating
+      def reset():
+          execute_button.config(state=DISABLED)
+          image.delete("all")
+          graph()
+          get_values()   
+
+      ### ~~ sets font size for certain parts of text on graph       
+      size = tkFont.Font(size=14)
+
+      ### ~~ draws non animated lines and grids sliders to the page for use when changing graph values
+      graph()
+      equation_label = Label(image_frame, text="y = Asin("+u'\u03A9'.lower()+"t + "+ u'\u03A6'.lower()+")", font=size, bg="#CCE1F1")
+      equation_label.grid(row=1, columnspan=4)
+
+      execute_button = Button(image_frame, text="Execute", command=reset, bg="#CCE1F1")
+      execute_button.grid(row=1, columnspan=4, sticky=E)
+
+      amp_label = Label(image_frame, text="A (meters)", bg="#CCE1F1")
+      amp_label.grid(row=2, column=0,sticky=W)
+      amp_slider = Scale(image_frame, from_=1, to=100, orient=HORIZONTAL, bg="#CCE1F1")
+      amp_slider.grid(row=3, column=0, sticky=W)
+
+      omega_label= Label(image_frame, text=u'\u03A9'.lower()+" (radians per second)", bg="#CCE1F1")
+      omega_label.grid(row=2, column=0)
+      omega_slider = Scale(image_frame, from_=1, to=8, orient=HORIZONTAL, bg="#CCE1F1")
+      omega_slider.grid(row=3, column=0)
+
+      phi_label = Label(image_frame, text=u'\u03A6'.lower()+" (radians)", bg="#CCE1F1")
+      phi_label.grid(row=2, column=0, sticky=E)
+      phi_slider = Scale(image_frame, from_=0, to=16, orient=HORIZONTAL, bg="#CCE1F1")
+      phi_slider.grid(row=3, column=0, sticky=E)
+      
+
+def help_screen():
+   """creates help menu and freezes current screen when help menu is open"""
+   ### ~~ creates window to open up on command of help button.
+   help_ = Toplevel()
+   help_.focus_set()
+   help_.grab_set()
+   help_.title("Help")
+   help_.geometry("350x600")
+   help_.minsize(250, 500)
+
+### ~~ creates variables for width and height of main screen
+width_ = 1250
+height_ = 620
+
+### ~~ creates font types, needs to be inserted into dictionary to allow for file storage
+LARGE_FONT = ("Verdana", 16)
+
+
+### ~~ creates root window and configures to correct dimensions
+root = Tk()
+
+### ~~ creates global counter (c), and sets globale variables for use in animations
+c = 0
+
+angle = round(1.675*3, 2)
+
+omega=0.5
+time=0.2
+A = 50
+
+### ~~ creates mainscreen and sets geometry of main screen
+root.title("Simple Harmonic Motion")
+root.geometry(str(width_)+"x"+str(height_))
+root.minsize(width_, height_)
+root.maxsize(width_+250, height_+50)
+root.grid_columnconfigure(0, weight=1)
+root.grid_rowconfigure(0, weight=1)
+
+### ~~ creates relevant screens and assigns them to root
+home_screen = Frame(root, bg="#CCE1F1")
+theory_screen = Frame(root, bg="#CCE1F1")
+vel_screen = Frame(root, bg="#CCE1F1")
+phase_screen = Frame(root, bg="#CCE1F1")
+test_screen = Frame(root, bg="#CCE1F1")
+
+### ~~ grids screens on top of each other
+for screen_ in (home_screen, theory_screen, vel_screen, phase_screen, test_screen):
+   screen_.grid(row=0, column=0, sticky=N+E+S+W)
+screen_raise(home_screen)
+
+### ~~ calls functions to pack relevant pieces from functions to     
+title(home_screen, "Home Page", LARGE_FONT, 10)
+intro_text(home_screen, "Welcome to project SMH, this piece of software has been designed with you in mind.\nPlease choose one of the following\
+topics to begin")
+contents(home_screen)
+nav_buttons(home_screen)
+
+title(theory_screen, "Background Theory", LARGE_FONT, 10)
+intro_text(theory_screen, "This section will give you a brief understanding of what Simple Harmonic Motion is.")
+text_image(theory_screen)
+nav_buttons(theory_screen)
+
+title(vel_screen, "Velocity and Acceleration", LARGE_FONT, 10)
+intro_text(vel_screen, "This section will give you an understanding as to how velocity and acceleration change whilst simple harmonic motion happens.")
+text_image(vel_screen)
+nav_buttons(vel_screen)
+
+title(phase_screen, "Phase Relationship", LARGE_FONT, 10)
+intro_text(phase_screen, "This section will give you an understanding as to how the starting postition of a particle in simple harmonic motion effects the phase angle.")
+text_image(phase_screen)
+nav_buttons(phase_screen)
+
+title(test_screen, "Test yourself", LARGE_FONT, 10)
+intro_text(test_screen, "Welcome to project SMH, this piece of software has been designed with you in mind.\nPlease choose one of the following\
+topics to begin")
+nav_buttons(test_screen)
+
+### ~~ loops root screen
+root.mainloop()
