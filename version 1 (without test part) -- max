@@ -432,63 +432,55 @@ def text_image(screen_):
    ### ~~ creates statement to access animation for phase screen
    elif screen_ == phase_screen:
 
-      ### ~~ creates function to get values from sliders and input them into lists for phase animation
       def get_values():
+          y_list = []
+          x_list = []
+          
+          amplitude = int(amp_slider.get())
+          omega = int(omega_slider.get())*(3.14/8)
+          phi = int(phi_slider.get())*(3.14/8)
 
-         ### ~~ creates empty lists for coordinates
-         y_list = []
-         x_list = []
+          time = 0
+          for i in range (1,350,1):
+              y_list.append(round(-amplitude*math.sin((omega*time/16 + phi)),2))
+              x_list.append(time)
+              time += 1.
 
-         ### ~~ gets values from sliders for calculations 
-         amplitude = int(amp_slider.get())
-         omega = int(omega_slider.get())*(3.14/8)
-         phi = int(phi_slider.get())*(3.14/8)
-
-         ### ~~ sets time variables to zero and appends lists to contain coordinates for animation
-         time = 0
-         for i in range (1,350,1):
-            y_list.append(round(-amplitude*math.sin((omega*time/16 + phi)),2))
-            x_list.append(time)
-            time += 1.
-
-         ### ~~ calls function to animate graph using coordinates from lists
-         animate(x_list, y_list)
-
-      ### ~~ creates function to animate graph from lists in above function    
+          animate(x_list, y_list)
+          
       def animate(x, y):
+          global d
 
-          ### ~~ creates sine wave line from list coordinates and adds one to counter
-          sine = image.create_line(x[d]+25, y[d]+160, x[d+1]+25, y[d+1]+160, fill="red")
+          sine = image.create_line(x[d]+25, y[d]+170, x[d+1]+25, y[d+1]+170, fill="red")
           d +=1
 
-          ### ~~ terminates animation upon completion
           if d == 350-2:
               execute_button.config(state=ACTIVE)
               return
-
-          ### ~~ initiates animation
+          
           root.after(10, animate, x, y)
 
-      ### ~~ creates non animated lines for graph
       def graph():
-          x_axis = image.create_line(25,30, 25, 300)
+          x_axis = image.create_line(25,30, 25, 290)
           x_arrow = image.create_line(25,30, 20,35), image.create_line(25,30, 30,35)
-          y_axis = image.create_line(25,160, 380, 160)
-          y_arrow = image.create_line(380,160, 375,155), image.create_line(380,160, 375,165)
-          y_text = image.create_text(375, 175, text="Time, (s)")
+          y_axis = image.create_line(25,170, 380,170)
+          y_arrow = image.create_line(380,170, 375,165), image.create_line(380,170, 375,175)
+          y_text = image.create_text(380, 190, text="Time, (s)")
           x_text = image.create_text(45,15, text="Amplitude, (m)")
 
-      ### ~~ deletes animation and non animated lines for animation execute button also disables button to so that animation must finish befor re-initiating
       def reset():
+          global d
+          d = 0
           execute_button.config(state=DISABLED)
           image.delete("all")
           graph()
-          get_values()   
-
-      ### ~~ sets font size for certain parts of text on graph       
+          get_values()
+      d = 0    
+          
       size = tkFont.Font(size=14)
 
-      ### ~~ draws non animated lines and grids sliders to the page for use when changing graph values
+      image.grid(columnspan=4)
+
       graph()
       equation_label = Label(image_frame, text="y = Asin("+u'\u03A9'.lower()+"t + "+ u'\u03A6'.lower()+")", font=size, bg="#CCE1F1")
       equation_label.grid(row=1, columnspan=4)
@@ -497,7 +489,7 @@ def text_image(screen_):
       execute_button.grid(row=1, columnspan=4, sticky=E)
 
       amp_label = Label(image_frame, text="A (meters)", bg="#CCE1F1")
-      amp_label.grid(row=2, column=0,sticky=W)
+      amp_label.grid(row=2, column=0, sticky=W)
       amp_slider = Scale(image_frame, from_=1, to=100, orient=HORIZONTAL, bg="#CCE1F1")
       amp_slider.grid(row=3, column=0, sticky=W)
 
@@ -510,7 +502,6 @@ def text_image(screen_):
       phi_label.grid(row=2, column=0, sticky=E)
       phi_slider = Scale(image_frame, from_=0, to=16, orient=HORIZONTAL, bg="#CCE1F1")
       phi_slider.grid(row=3, column=0, sticky=E)
-      
 
 def help_screen():
    """creates help menu and freezes current screen when help menu is open"""
@@ -542,7 +533,7 @@ omega=0.5
 time=0.2
 A = 50
 
-### ~~ creates mainscreen and sets geometry of main screen
+### ~~ creates mainscreen and sets geometry of root screen
 root.title("Simple Harmonic Motion")
 root.geometry(str(width_)+"x"+str(height_))
 root.minsize(width_, height_)
