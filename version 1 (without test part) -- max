@@ -38,9 +38,12 @@ def title(screen_, text_, font_, pad_):
    save_button = Button(title_frame, text="Save", bg="#CCE1F1")
    save_button.grid(row=0, column=1, sticky=E, ipadx=15, ipady=3, padx=2)
    ### ~~ bypass' save button for relevent screens and replaces with empty label to keep screen configuration in line
-   if screen_ == home_screen:
+   if screen_ == home_screen or screen_ == theory_screen or screen_ == vel_screen or screen_ ==  phase_screen or screen_ == test_screen:
        save_button.grid_remove()
        Frame(title_frame, bg="#CCE1F1").grid(row=0, column=1, sticky=E, ipadx=32, ipady=15, padx=2)
+       if screen_ == theory_screen or screen_ == vel_screen or screen_ ==  phase_screen:
+           save_button.grid_remove()
+           Frame(title_frame, bg="#CCE1F1").grid(row=0, column=0, sticky=E, ipadx=35, ipady=20, padx=2)
 
    ### ~~ creates quit button and grids to title frame, will have save functionality added during intergration
    quit_button = Button(title_frame, text="Quit", bg="#CCE1F1", command=lambda:root.destroy())
@@ -61,6 +64,10 @@ def intro_text(screen_, text_):
    intro_label = Label(intro_frame, text=text_, bg="white",
                        relief=SOLID, bd=1)
    intro_label.grid(row=1, ipady=5, ipadx=5, sticky=N, pady=10)
+
+   if screen_ == test_screen:
+      test_button = Button(intro_frame, text="Start Test!", command=lambda:screen_raise(quiz_screen))
+      test_button.grid(row=2,column=0,sticky=N)
 
 def contents(screen_):
    """packs a box with all relevent contents buttons to contents screen"""
@@ -110,7 +117,7 @@ def nav_buttons(screen_):
    relevent screens dependant on screen"""
    ### ~~ creates nav_frame to grid buttons to and grids to main frame
    nav_frame = Frame(screen_, bg="#CCE1F1")
-   nav_frame.grid(row=3, column=0, padx=10, pady=10, sticky=N+E+S+W)
+   nav_frame.grid(row=3, column=0, padx=10, pady=10, sticky=E+S+W)
 
    ### ~~ sets variables to change dependant on current screen
    back = 0
@@ -128,6 +135,8 @@ def nav_buttons(screen_):
        next_ = test_screen
    elif screen_ == test_screen:
        back = phase_screen
+   elif screen_ == quiz_screen:
+       back = test_screen
 
    ### ~~ configures columns so buttons will move accrording to screeen size to relevant position
    x = 0
@@ -155,6 +164,9 @@ def nav_buttons(screen_):
        next_button.grid_remove()
        Frame(nav_frame, bg="#CCE1F1").grid(row=0, column=0, sticky=E, ipadx=32, ipady=15, padx=2)
        Frame(nav_frame, bg="#CCE1F1").grid(row=0, column=1, sticky=E, ipadx=32, ipady=15, padx=2)
+       Frame(nav_frame, bg="#CCE1F1").grid(row=0, column=2, sticky=E, ipadx=32, ipady=15, padx=2)
+   elif screen_ == quiz_screen:
+       next_button.grid_remove()
        Frame(nav_frame, bg="#CCE1F1").grid(row=0, column=2, sticky=E, ipadx=32, ipady=15, padx=2)
    ### ~~~ removes next button if about to initiate test
    if screen_ == test_screen:
@@ -248,7 +260,7 @@ def text_image(screen_):
    image_frame = Frame(bulk_text_frame, bg="#CCE1F1")
    image_frame.grid(row=0, column=1, sticky=W+N+E, padx=20)
    ### ~~ configures image frame to fit required space    
-   image_frame.grid_columnconfigure(0, weight=2)
+   image_frame.grid_columnconfigure(0, weight=1)
    image_frame.grid_rowconfigure(0, weight=1)
    #image_frame.grid_rowconfigure(1, weight=1)
 
@@ -400,7 +412,7 @@ def text_image(screen_):
       ### ~~ creates function for animation
       def animation():
 
-          ### ~~ draws gloabel counter variable (c) and creates lines to be dran as animations
+          ### ~~ draws gloabel counter variable (c) and creates lines to be drawn as animations
           global c
           amp_sine = image.create_line(x_list[c]+20, amp_y_list[c]+80, x_list[c+1]+20, amp_y_list[c+1]+80, fill="black")
           vel_sine = image.create_line(x_list[c]+20, vel_y_list[c]+200, x_list[c+1]+20, vel_y_list[c+1]+200, fill="red")
@@ -513,6 +525,114 @@ def help_screen():
    help_.geometry("350x600")
    help_.minsize(250, 500)
 
+def start_test(screen_):
+    
+    def hint_1_():
+        for widget in hint_display_frame.winfo_children():
+            widget.destroy()
+        hint_1 = Label(hint_display_frame, text="maximum velocity = A*omega^2, omega = 2*pi*f")
+        hint_1.grid(row=1)
+        
+    def hint_2_():
+        for widget in hint_display_frame.winfo_children():
+            widget.destroy()
+        hint_2 = Label(hint_display_frame, text="Acceleration = A*omega^2")
+        hint_2.grid(row=1)
+        
+    def hint_3_():
+        for widget in hint_display_frame.winfo_children():
+            widget.destroy()
+        hint_3 = Label(hint_display_frame, text="(𝑥 = 5cos0.5t => when x=2cm ;\
+\n0.5t = cos-1(2/5) => t = 1.1593/0.5 = 2.23 s)")
+        hint_3.grid(row=1)
+        
+    def hint_4_():
+        for widget in hint_display_frame.winfo_children():
+            widget.destroy()
+        hint_4 = Label(hint_display_frame, text="Frequency f = omega/2*pi = pi/2*pi = 0.5Hz")
+        hint_4.grid(row=1)
+        
+    def hint_5_():
+        for widget in hint_display_frame.winfo_children():
+            widget.destroy()
+        hint_5 = Label(hint_display_frame, text="unknown")
+        hint_5.grid(row=1)
+        
+    screen_.rowconfigure(1, weight=1)
+    test_frame = Frame(screen_)
+    test_frame.grid(row=1, column=0, sticky=N+S+E+W, padx=50)
+
+    question_frame = Frame(test_frame)
+    question_frame.grid(row=0, column=0)
+
+    hint_frame = Frame(test_frame, bg="white")
+    hint_frame.grid(row=0, column=1, ipadx=100, ipady=10, padx=10, sticky=N)
+    hint_label = Label(hint_frame, text="Hint:")
+    hint_label.grid(row=0, column=0, sticky=N+W)
+    hint_display_frame = Frame(hint_frame)
+    hint_display_frame.grid(row=1, column=0)
+
+    question_1_label = Label(question_frame, text="Q1) A body oscillates with a frequency of 2Hz. What is its maximum velocity in meters per second?") 
+    question_1_label.grid(row=0, column=0, sticky=W, ipady=10, ipadx=10)
+    question_1_entry = Entry(question_frame)
+    question_1_entry.grid(row=0, column=1, sticky=E)
+    q1_hint_button = Button(question_frame, text="Q1) Hint", command=hint_1_)
+    q1_hint_button.grid(row=1, column=1, sticky=E)
+
+    question_2_label = Label(question_frame, text="Q2) A body oscilates with a frequency of 2Hz. What is its acceleration in meters per second^2?")
+    question_2_label.grid(row=2, column=0, sticky=W, ipady=10, ipadx=10)
+    question_2_entry = Entry(question_frame)
+    question_2_entry.grid(row=2, column=1, sticky=E)
+    q2_hint_button = Button(question_frame, text="Q2) Hint", command=hint_2_)
+    q2_hint_button.grid(row=3, column=1, sticky=E)
+
+    
+    q3_label = Label(question_frame, text="Q3) A mass oscillates with SHM. Its displacement x=5cos(0.5t), where the amplitude is in cm and\n the \
+time is in seconds. Determine the time when the displacement is 2.0cm?")
+    q3_label.grid(row=4, column=0, sticky=W, ipady=10, ipadx=10)
+    q3_hint_button = Button(question_frame, text="Q3) Hint", command=hint_3_)
+    q3_hint_button.grid(row=5, column=1, sticky=E)
+    v3 = IntVar()
+    q3_frame = Frame(question_frame)
+    q3_frame.grid(row=4, column=1)
+    q3_ans1 = Radiobutton(q3_frame, text="2.33s", variable=v3, value=2.33)
+    q3_ans1.grid(row=0, column=0)
+    q3_ans2 = Radiobutton(q3_frame, text="4.46s", variable=v3, value=4.46)
+    q3_ans2.grid(row=0, column=2)
+    q3_ans3 = Radiobutton(q3_frame, text="1.16s", variable=v3, value=1.16)
+    q3_ans3.grid(row=0, column=3)
+    q3_ans4 = Radiobutton(q3_frame, text="4.99s", variable=v3, value=4.99)
+    q3_ans4.grid(row=0, column=4)
+    
+    q4_label = Label(question_frame, text="Q4) The displacement equation for an object undergoing SHM is : x = 10sin(pi*t + pi/4), \
+where x is in \ncm and t is in seconds. Determine the frequency?")
+    q4_label.grid(row=6, column=0, sticky=W, ipady=10, ipadx=10)
+    q4_hint_button = Button(question_frame, text="Q4) Hint", command=hint_4_)
+    q4_hint_button.grid(row=7, column=1, sticky=E)
+    v4 = IntVar()
+    q4_frame = Frame(question_frame)
+    q4_frame.grid(row=6, column=1)
+    q4_ans1 = Radiobutton(q4_frame, text="1.6Hz", variable=v3, value=1.6)
+    q4_ans1.grid(row=0, column=0)
+    q4_ans2 = Radiobutton(q4_frame, text="0.13Hz", variable=v3, value=0.13)
+    q4_ans2.grid(row=0, column=2)
+    q4_ans3 = Radiobutton(q4_frame, text="0.5Hz", variable=v3, value=0.5)
+    q4_ans3.grid(row=0, column=3)
+    q4_ans4 = Radiobutton(q4_frame, text="1.0Hz", variable=v3, value=1.0)
+    q4_ans4.grid(row=0, column=4)
+
+    q5_label =Label(question_frame, text="Q5) A mass of 3 kg rests on a smooth horizontal surface, as shown in the below figure. \
+If the stiffness of \neach spring is 1kN/m, determine the frequency of vibration of the mass. It may be assumed \nthat, initially, the springs are un-stretched?")
+    q5_label.grid(row=8, column=0, sticky=W, ipady=10, ipadx=10)
+    q5_entry = Entry(question_frame)
+    q5_entry.grid(row=8, column=1, sticky=E)
+    q5_hint_button = Button(question_frame, text="Q5) Hint", command=hint_5_)
+    q5_hint_button.grid(row=9, column=1, sticky=E)
+
+    mark_button = Button(question_frame, text="Get Results", bg="#CCE1F1")
+    mark_button.grid(row=10, column=1, sticky=S+E, ipadx=15, ipady=3, pady=50)
+
+    
 ### ~~ creates variables for width and height of main screen
 width_ = 1250
 height_ = 620
@@ -547,9 +667,10 @@ theory_screen = Frame(root, bg="#CCE1F1")
 vel_screen = Frame(root, bg="#CCE1F1")
 phase_screen = Frame(root, bg="#CCE1F1")
 test_screen = Frame(root, bg="#CCE1F1")
+quiz_screen = Frame(root, bg="#CCE1F1")
 
 ### ~~ grids screens on top of each other
-for screen_ in (home_screen, theory_screen, vel_screen, phase_screen, test_screen):
+for screen_ in (home_screen, theory_screen, vel_screen, phase_screen, test_screen, quiz_screen):
    screen_.grid(row=0, column=0, sticky=N+E+S+W)
 screen_raise(home_screen)
 
@@ -576,9 +697,12 @@ text_image(phase_screen)
 nav_buttons(phase_screen)
 
 title(test_screen, "Test yourself", LARGE_FONT, 10)
-intro_text(test_screen, "Welcome to project SMH, this piece of software has been designed with you in mind.\nPlease choose one of the following\
-topics to begin")
+intro_text(test_screen, "Would you like to test your knowledge?")
 nav_buttons(test_screen)
+
+title(quiz_screen, "Quiz", LARGE_FONT, 10)
+start_test(quiz_screen)
+nav_buttons(quiz_screen)
 
 ### ~~ loops root screen
 root.mainloop()
